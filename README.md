@@ -6,7 +6,7 @@ App full stack para registrar treinos de musculação, acompanhar progressão de
 
 - Backend: Java 21, Spring Boot 3.3.5, Maven (wrapper), Web, Data JPA, Validation, Security + JWT (jjwt), PostgreSQL 16, Flyway, Springdoc OpenAPI, Actuator. **Sem Lombok** (DTOs como `records`, entidades explícitas).
 - Frontend: React 18 + Vite 5 + TypeScript 5, React Router 6, TanStack Query 5, React Hook Form + Zod, Recharts 2, CSS puro mobile-first (sem Tailwind — decisão abaixo).
-- Testes: JUnit 5, Mockito, Testcontainers (Postgres), MockMvc.
+- Testes: JUnit 5, Mockito, Testcontainers (Postgres ≥1.21.4 — exigido pelo Docker Engine v29+, que requer API mínima 1.44), MockMvc.
 - Infra: Docker multi-stage, docker-compose (`db` + `api` + `web`), GitHub Actions.
 
 ## Como rodar (1 comando)
@@ -14,9 +14,17 @@ App full stack para registrar treinos de musculação, acompanhar progressão de
 Pré-requisitos: Docker com plugin Compose, Java 21 e Node 20 (só para rodar fora do Docker).
 
 ```bash
-cp .env.example .env   # gere um JWT_SECRET real: openssl rand -base64 48
+cp .env.example .env   # no Windows PowerShell o `cp` também funciona
 docker compose up --build
 ```
+
+Gere um `JWT_SECRET` real no `.env` (mínimo 32 chars). No Linux/macOS: `openssl rand -base64 48`. No Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Max 256 }))
+```
+
+> O `.env.example` já vem com `CORS_ALLOWED_ORIGINS=http://localhost,http://localhost:5173` para funcionar tanto no compose (porta 80) quanto no dev (porta 5173). Se o cadastro falhar no navegador mas funcionar via `curl`, confira essa variável.
 
 - Web: http://localhost (Nginx) · API: http://localhost:8080/health · Swagger: http://localhost:8080/swagger-ui.html
 
@@ -27,6 +35,10 @@ docker compose up -d db          # só o Postgres
 cd backend; ./mvnw spring-boot:run
 cd frontend; npm install; npm run dev   # http://localhost:5173
 ```
+
+> Rodando a API fora do Docker, exporte o `JWT_SECRET` antes (o boot falha sem ele, por segurança). Bash: `export JWT_SECRET=$(openssl rand -base64 48)`. PowerShell: `$env:JWT_SECRET = "uma-chave-local-com-mais-de-32-caracteres"`. No Windows use `.\mvnw.cmd` em vez de `./mvnw`.
+>
+> Não há login padrão: cadastre-se na tela de cadastro (web) ou via `POST /auth/register` no Swagger.
 
 Testes: `cd backend; ./mvnw verify` (exige Docker p/ Testcontainers) · `cd frontend; npm run build`.
 
