@@ -10,7 +10,7 @@
 ## Estrutura
 - Monorepo: `backend/`, `frontend/`, `docs/`, `.opencode/agent/`, `docker-compose.yml`, `README.md`, `AGENTS.md`, `APRENDIZADOS.md`.
 - Pacote base: `br.com.treino`. Subpacotes: `controller, service, repository, domain, dto, config, security, exception`.
-- Nomes de classes/métodos/variáveis em **inglês**; mensagens de erro e validação em **português**.
+- Nomes de classes/métodos/variáveis em **inglês**; mensagens de erro e validação em **português**. Exceção aceita: entidades do domínio (`Ficha`, `Treino`, `Serie`, `MedidaCorporal`) usam linguagem ubíqua em PT por decisão didática.
 
 ## Regras obrigatórias (reviewer barra se violar)
 1. **Nunca expor entidade JPA na API.** Sempre DTOs como `records`. Mapeamento manual explícito no service (sem MapStruct/ModelMapper).
