@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    container_name: treino-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-treino}
+      POSTGRES_USER: ${POSTGRES_USER:-treino}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-treino}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-treino} -d ${POSTGRES_DB:-treino}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - treino-net
+
+networks:
+  treino-net:
+    name: treino-net
+
+volumes:
+  pgdata:
+    name: treino-pgdata

@@ -1,0 +1,31 @@
+# Binários / build
+target/
+node_modules/
+dist/
+build/
+*.class
+*.jar
+*.log
+
+# Maven wrapper (manter jar + properties versionados)
+!backend/.mvn/wrapper/maven-wrapper.jar
+!backend/.mvn/wrapper/maven-wrapper.properties
+
+# Spring / IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Env / segredos (nunca commitar .env real)
+.env
+*.pem
+*.jks
+
+# Docker volumes
+pgdata/
+
+# Frontend
+frontend/dist/
+frontend/.vite/
