@@ -11,13 +11,7 @@ import {
 } from "recharts";
 import { api, mensagemErro } from "../api/client";
 import type { Exercicio, Recorde, VolumeSemanal } from "../api/types";
-
-function hojeISO(): string {
-  const agora = new Date();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const dia = String(agora.getDate()).padStart(2, "0");
-  return `${agora.getFullYear()}-${mes}-${dia}`;
-}
+import { formatarData, hojeISO } from "../utils/data";
 
 function menosDias(dias: number): string {
   const d = new Date();
@@ -25,11 +19,6 @@ function menosDias(dias: number): string {
   const mes = String(d.getMonth() + 1).padStart(2, "0");
   const dia = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${mes}-${dia}`;
-}
-
-function formatarData(iso: string): string {
-  const [ano, mes, dia] = iso.split("-");
-  return `${dia}/${mes}/${ano}`;
 }
 
 export function EstatisticasPage() {
@@ -52,27 +41,29 @@ export function EstatisticasPage() {
     queryFn: async () => (await api.get<Exercicio[]>("/exercicios")).data,
   });
 
-  // Top recordes: busca o recorde de no máximo 5 exercícios para não
-  // estourar o backend com N requests (exercícios sem treino retornam 404 e são ignorados).
+  // Recordes: sem endpoint agregado, busca o recorde de no máximo 5 exercícios
+  // (exercícios sem treino retornam 404 e são ignorados) e exibe os 3 maiores
+  // 1RM dessa amostra — não é um top 3 global. Ideal: GET /estatisticas/recordes.
   const primeiros = (exercicios.data ?? []).slice(0, 5);
   const recordes = useQueries({
     queries: primeiros.map((ex) => ({
       queryKey: ["recorde", ex.id],
       queryFn: async () => (await api.get<Recorde>(`/exercicios/${ex.id}/recorde`)).data,
       retry: false,
+      staleTime: 30_000,
     })),
   });
   const carregandoRecordes = recordes.some((r) => r.isPending);
-  const top3 = recordes
+  const destaques = recordes
     .map((r, i) => ({ ex: primeiros[i], rec: r.data }))
     .filter((x) => x.rec !== undefined)
     .map((x) => ({ nome: x.ex.nome, rec: x.rec as Recorde }))
-    .sort((a, b) => Number(b.rec.maxEpley) - Number(a.rec.maxEpley))
+    .sort((a, b) => b.rec.maxEpley - a.rec.maxEpley)
     .slice(0, 3);
 
   const pontos = (volume.data ?? []).map((v) => ({
     semana: formatarData(v.semanaSegunda),
-    volume: Number(v.volume),
+    volume: v.volume,
   }));
 
   return (
@@ -128,13 +119,13 @@ export function EstatisticasPage() {
       </section>
 
       <section className="card">
-        <h2>Top recordes (1RM)</h2>
+        <h2>Recordes</h2>
         {carregandoRecordes && <p className="muted">Carregando…</p>}
-        {!carregandoRecordes && top3.length === 0 && (
-          <p className="muted">Sem recordes ainda. Registre treinos para ver o top 3.</p>
+        {!carregandoRecordes && destaques.length === 0 && (
+          <p className="muted">Sem recordes ainda. Registre treinos para vê-los aqui.</p>
         )}
         <ul className="lista">
-          {top3.map((t) => (
+          {destaques.map((t) => (
             <li key={t.rec.exercicioId}>
               <strong>{t.nome}</strong>
               <span className="muted">

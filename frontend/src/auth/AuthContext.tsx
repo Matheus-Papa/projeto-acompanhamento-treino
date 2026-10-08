@@ -21,13 +21,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function login(email: string, senha: string) {
-    const { data } = await api.post<AuthResponse>("/auth/login", { email, senha });
-    await guardarToken(data);
+    try {
+      const { data } = await api.post<AuthResponse>("/auth/login", { email, senha });
+      await guardarToken(data);
+    } catch (e) {
+      // Falha no /login não pode manter token velho: limpa aqui (e não no
+      // interceptor, para não quebrar o redirect de 401 das rotas logadas).
+      logout();
+      throw e;
+    }
   }
 
   async function cadastrar(nome: string, email: string, senha: string) {
-    const { data } = await api.post<AuthResponse>("/auth/register", { nome, email, senha });
-    await guardarToken(data);
+    try {
+      const { data } = await api.post<AuthResponse>("/auth/register", { nome, email, senha });
+      await guardarToken(data);
+    } catch (e) {
+      logout();
+      throw e;
+    }
   }
 
   function logout() {

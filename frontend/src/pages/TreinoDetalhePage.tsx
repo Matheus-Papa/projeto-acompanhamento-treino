@@ -2,11 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { api, mensagemErro } from "../api/client";
 import type { Treino } from "../api/types";
-
-function formatarData(iso: string): string {
-  const [ano, mes, dia] = iso.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
+import { formatarData } from "../utils/data";
 
 export function TreinoDetalhePage() {
   const { id } = useParams<{ id: string }>();

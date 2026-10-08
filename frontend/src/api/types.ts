@@ -64,7 +64,7 @@ export interface Serie {
   id: string;
   numero: number;
   repeticoes: number;
-  cargaKg: string;
+  cargaKg: number;
   rpe: number | null;
   exercicio: Exercicio;
 }
@@ -108,7 +108,7 @@ export interface TreinoResumo {
   duracaoMin: number | null;
   fichaId: string | null;
   totalSeries: number;
-  volumeTotal: string;
+  volumeTotal: number;
 }
 
 export interface Page<T> {
@@ -121,35 +121,35 @@ export interface Page<T> {
 
 export interface MelhorSerie {
   repeticoes: number;
-  cargaKg: string;
+  cargaKg: number;
 }
 
 export interface HistoricoItem {
   treinoId: string;
   data: string;
   melhorSerie: MelhorSerie;
-  volume: string;
-  epley: string;
+  volume: number;
+  epley: number;
 }
 
 export interface Recorde {
   exercicioId: string;
-  maxCarga: string;
-  maxEpley: string;
+  maxCarga: number;
+  maxEpley: number;
   emTreinoId: string;
   emData: string;
 }
 
 export interface VolumeSemanal {
   semanaSegunda: string;
-  volume: string;
+  volume: number;
 }
 
 export interface Medida {
   id: string;
   data: string;
-  pesoKg: string;
-  percentualGordura: string | null;
+  pesoKg: number;
+  percentualGordura: number | null;
 }
 
 export interface MedidaRequest {

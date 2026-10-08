@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { mensagemErro } from "../api/client";
 
@@ -14,7 +14,7 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, token } = useAuth();
   const navigate = useNavigate();
   const [erroApi, setErroApi] = useState("");
   const {
@@ -32,6 +32,8 @@ export function LoginPage() {
       setErroApi(mensagemErro(e, "Não foi possível entrar. Verifique os dados."));
     }
   }
+
+  if (token) return <Navigate to="/" replace />;
 
   return (
     <section className="card">

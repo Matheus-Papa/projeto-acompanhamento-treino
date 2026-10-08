@@ -14,28 +14,14 @@ import {
 } from "recharts";
 import { api, mensagemErro } from "../api/client";
 import type { Medida } from "../api/types";
-
-function hojeISO(): string {
-  const agora = new Date();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const dia = String(agora.getDate()).padStart(2, "0");
-  return `${agora.getFullYear()}-${mes}-${dia}`;
-}
-
-function formatarData(iso: string): string {
-  const [ano, mes, dia] = iso.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
+import { formatarData, hojeISO } from "../utils/data";
 
 const schema = z.object({
   data: z
     .string()
     .min(1, "Data é obrigatória")
     .refine((d) => d <= hojeISO(), "Data não pode ser futura"),
-  pesoKg: z.coerce
-    .number()
-    .positive("Peso deve ser maior que zero")
-    .max(500, "Peso inválido"),
+  pesoKg: z.coerce.number().positive("Peso deve ser maior que zero"),
   percentualGordura: z.preprocess(
     (v) => (v === "" || v === null || v === undefined ? undefined : v),
     z.coerce
@@ -64,11 +50,10 @@ export function MedidasPage() {
     formState: { errors },
   } = useForm<Form>({
     resolver: zodResolver(schema),
-    // "" inicial mantém o campo vazio; coerce do Zod converte no submit.
+    // Sem pesoKg inicial: campo vazio; o coerce do Zod converte no submit.
     defaultValues: {
       data: hojeISO(),
-      pesoKg: "" as unknown as number,
-      percentualGordura: "" as unknown as undefined,
+      percentualGordura: undefined,
     },
   });
 
@@ -76,14 +61,14 @@ export function MedidasPage() {
     mutationFn: async (dados: Form) => (await api.post<Medida>("/medidas", dados)).data,
     onSuccess: () => {
       setErroApi("");
-      reset({ data: hojeISO(), pesoKg: "" as unknown as number, percentualGordura: undefined });
+      reset({ data: hojeISO(), percentualGordura: undefined });
       queryClient.invalidateQueries({ queryKey: ["medidas"] });
     },
     onError: (e) => setErroApi(mensagemErro(e, "Não foi possível registrar a medida.")),
   });
 
   const ordenadas = [...(lista.data ?? [])].sort((a, b) => (a.data < b.data ? -1 : 1));
-  const pontos = ordenadas.map((m) => ({ data: formatarData(m.data), peso: Number(m.pesoKg) }));
+  const pontos = ordenadas.map((m) => ({ data: formatarData(m.data), peso: m.pesoKg }));
 
   return (
     <div className="coluna">

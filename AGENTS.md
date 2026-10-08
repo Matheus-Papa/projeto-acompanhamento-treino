@@ -20,7 +20,7 @@
 5. **Transacional:** registro de treino com `@Transactional` no service; qualquer série inválida → rollback total.
 6. **Isolamento por usuário:** toda query filtra por `usuarioId` do JWT; recurso de outro usuário retorna **404** (não 403, para não vazar existência).
 7. **Erros em JSON padronizado** via `@RestControllerAdvice`: `{timestamp, status, mensagem, caminho, errosCampos[]}`. Bean Validation com mensagens em português.
-8. **Segurança:** senha BCrypt; JWT `Authorization: Bearer`, expiração 1h, chave de `JWT_SECRET` (env, min 32 chars). Públicos: `/auth/**`, `/health`, `/v3/api-docs/**`, `/swagger-ui/**`. CORS só `http://localhost:5173` (via env).
+8. **Segurança:** senha BCrypt; JWT `Authorization: Bearer`, expiração 1h, chave de `JWT_SECRET` (env, min 32 chars, sem default — fail-fast). Públicos: `/auth/**`, `/health`, `/v3/api-docs/**`, `/swagger-ui/**`. CORS só via env (`http://localhost:5173` no dev, `http://localhost` no compose).
 9. **Validações de treino:** `repeticoes > 0`, `carga >= 0`, exercício existente e acessível (global ou do usuário), `data <= hoje`.
 10. **Segredos só via ambiente.** Nunca hardcoded. `.env` real nunca commitado; manter `.env.example`.
 11. **Sem placeholders.** Skill `full-output-enforcement`: proibido `// resto do código aqui`, `...`. Todo arquivo entregue completo e compilável.

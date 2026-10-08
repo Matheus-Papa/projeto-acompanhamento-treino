@@ -1,3 +1,7 @@
+# JWT_SECRET é OBRIGATÓRIO no arquivo .env (sem default por segurança).
+# O compose falha na validação se JWT_SECRET estiver ausente ou vazio.
+# Gere com: openssl rand -base64 48  (mínimo 32 chars)
+# Um `docker compose up --build` sobe db + api + web.
 services:
   db:
     image: postgres:16
@@ -17,6 +21,45 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - treino-net
+
+  api:
+    build: ./backend
+    container_name: treino-api
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-treino}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-treino}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-treino}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no arquivo .env (minimo 32 chars, sem default por seguranca)}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - treino-net
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+    container_name: treino-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
     networks:
       - treino-net
 

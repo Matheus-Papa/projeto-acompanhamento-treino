@@ -4,13 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, mensagemErro } from "../api/client";
 import type { Page, TreinoResumo } from "../api/types";
+import { formatarData } from "../utils/data";
 
 const TAMANHO = 10;
-
-function formatarData(iso: string): string {
-  const [ano, mes, dia] = iso.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
 
 export function HistoricoPage() {
   const [de, setDe] = useState("");

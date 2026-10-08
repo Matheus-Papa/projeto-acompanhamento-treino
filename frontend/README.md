@@ -1,7 +1,9 @@
-# Frontend — Acompanhamento de Treino (F8-01, F8-02 parcial)
+# Frontend — Acompanhamento de Treino
 
 React 18 + Vite 5 + TypeScript, React Router 6, TanStack Query 5,
-React Hook Form + Zod, Axios, CSS puro mobile-first (sem Tailwind).
+React Hook Form + Zod, Axios, Recharts, CSS puro mobile-first (sem Tailwind).
+
+Visão geral do projeto: veja o [README raiz](../README.md).
 
 ## Rodar
 
@@ -17,15 +19,25 @@ Configure a API em `.env` (veja `.env.example`):
 VITE_API_URL=http://localhost:8080
 ```
 
+## Rotas
+
+- `/login`, `/cadastro` (públicas; redirecionam para `/` se já logado)
+- `/` (registrar treino + timer de descanso)
+- `/historico` (lista paginada com "carregar mais"), `/treinos/:id` (detalhe)
+- `/evolucao`, `/evolucao/:exercicioId` (recorde + gráficos Epley/volume)
+- `/estatisticas` (volume semanal + recordes da amostra)
+- `/medidas` (registro + gráfico de peso)
+- `/exercicios` (lista com badge "global" + criar próprio)
+- `/fichas`, `/fichas/:id` (lista/criar, editar + excluir)
+
 ## Tipos da API
 
-`src/api/types.ts` é um **espelho manual** dos DTOs em
-`backend/src/main/java/br/com/treino/dto/*.java`
-(Auth, Exercicio, Ficha, Treino, Serie, Pr, Historico, Recorde,
-VolumeSemanal, Medida, ErroPadrao) e dos paths dos controllers
-(`/auth`, `/exercicios`, `/fichas`, `/treinos`, `/medidas`, `/estatisticas`).
+`src/api/types.ts` espelha os DTOs do backend (`br.com.treino.dto.*`):
+numéricos de `BigDecimal` (`cargaKg`, `volume`, `epley`, `maxCarga`,
+`maxEpley`, `pesoKg`, `percentualGordura`) são `number` no JSON. Inputs de
+formulário continuam string e usam `z.coerce` na validação.
 
-Com a API rodando, pode ser regenerado via:
+Com a API rodando, regenere via OpenAPI:
 
 ```bash
 npx openapi-typescript http://localhost:8080/v3/api-docs -o src/api/types.ts
@@ -33,12 +45,7 @@ npx openapi-typescript http://localhost:8080/v3/api-docs -o src/api/types.ts
 
 Nesse caso, adapte os imports que hoje usam os tipos manuais.
 
-## Rotas
+## Fora de escopo (conhecido)
 
-- `/login`, `/cadastro` (públicas)
-- `/` (home — placeholder com links; registro completo de treino é F8-B)
-- `/exercicios` (lista globais+próprios com badge "global" + criar próprio)
-- `/fichas` (lista + criar com itens ordenados)
-- `/fichas/:id` (editar + excluir)
-
-Telas de histórico, gráficos, stats e medidas ficam para o F8-B.
+- Edição/exclusão de exercício (só criação; Globais vêm do backend).
+- Agregado de recordes no backend (`Recordes` usa amostra de até 5 exercícios).

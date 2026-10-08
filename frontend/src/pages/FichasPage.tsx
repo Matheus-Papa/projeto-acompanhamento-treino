@@ -1,25 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import { api, mensagemErro } from "../api/client";
 import type { Exercicio, Ficha } from "../api/types";
-
-const itemSchema = z.object({
-  exercicioId: z.string().min(1, "Exercício é obrigatório"),
-  ordem: z.coerce.number().int().positive("Ordem deve ser maior que zero"),
-  seriesAlvo: z.coerce.number().int().positive("Séries alvo devem ser maiores que zero"),
-  repsAlvo: z.coerce.number().int().positive("Repetições alvo devem ser maiores que zero"),
-});
-
-const schema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório").max(120, "Nome deve ter no máximo 120 caracteres"),
-  itens: z.array(itemSchema).min(1, "Ficha deve ter ao menos um exercício"),
-});
-
-type Form = z.infer<typeof schema>;
+import { fichaSchema, type FichaForm } from "./fichaSchema";
 
 export function FichasPage() {
   const queryClient = useQueryClient();
@@ -40,14 +26,14 @@ export function FichasPage() {
     control,
     reset,
     formState: { errors },
-  } = useForm<Form>({
-    resolver: zodResolver(schema),
+  } = useForm<FichaForm>({
+    resolver: zodResolver(fichaSchema),
     defaultValues: { nome: "", itens: [{ exercicioId: "", ordem: 1, seriesAlvo: 3, repsAlvo: 10 }] },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "itens" });
 
   const criar = useMutation({
-    mutationFn: async (dados: Form) => (await api.post<Ficha>("/fichas", dados)).data,
+    mutationFn: async (dados: FichaForm) => (await api.post<Ficha>("/fichas", dados)).data,
     onSuccess: () => {
       setErroApi("");
       reset();

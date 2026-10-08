@@ -1,25 +1,11 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, mensagemErro } from "../api/client";
 import type { Exercicio, Ficha } from "../api/types";
-
-const itemSchema = z.object({
-  exercicioId: z.string().min(1, "Exercício é obrigatório"),
-  ordem: z.coerce.number().int().positive("Ordem deve ser maior que zero"),
-  seriesAlvo: z.coerce.number().int().positive("Séries alvo devem ser maiores que zero"),
-  repsAlvo: z.coerce.number().int().positive("Repetições alvo devem ser maiores que zero"),
-});
-
-const schema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório").max(120, "Nome deve ter no máximo 120 caracteres"),
-  itens: z.array(itemSchema).min(1, "Ficha deve ter ao menos um exercício"),
-});
-
-type Form = z.infer<typeof schema>;
+import { fichaSchema, type FichaForm } from "./fichaSchema";
 
 export function FichaDetalhePage() {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +29,7 @@ export function FichaDetalhePage() {
     control,
     reset,
     formState: { errors },
-  } = useForm<Form>({ resolver: zodResolver(schema) });
+  } = useForm<FichaForm>({ resolver: zodResolver(fichaSchema) });
   const { fields, append, remove } = useFieldArray({ control, name: "itens" });
 
   useEffect(() => {
@@ -63,7 +49,7 @@ export function FichaDetalhePage() {
   }, [ficha.data, reset]);
 
   const salvar = useMutation({
-    mutationFn: async (dados: Form) => (await api.put<Ficha>(`/fichas/${id}`, dados)).data,
+    mutationFn: async (dados: FichaForm) => (await api.put<Ficha>(`/fichas/${id}`, dados)).data,
     onSuccess: (dados) => {
       setErroApi("");
       queryClient.invalidateQueries({ queryKey: ["ficha", id] });
@@ -96,7 +82,9 @@ export function FichaDetalhePage() {
   if (ficha.isError) {
     return (
       <section className="card">
-        <p className="erro">Ficha não encontrada.</p>
+        <p className="erro" role="alert">
+          {mensagemErro(ficha.error, "Ficha não encontrada.")}
+        </p>
         <Link className="botao secundario" to="/fichas">
           Voltar
         </Link>

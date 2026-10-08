@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { mensagemErro } from "../api/client";
 
@@ -18,7 +18,7 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 export function CadastroPage() {
-  const { cadastrar } = useAuth();
+  const { cadastrar, token } = useAuth();
   const navigate = useNavigate();
   const [erroApi, setErroApi] = useState("");
   const {
@@ -36,6 +36,8 @@ export function CadastroPage() {
       setErroApi(mensagemErro(e, "Não foi possível cadastrar. Tente de novo."));
     }
   }
+
+  if (token) return <Navigate to="/" replace />;
 
   return (
     <section className="card">

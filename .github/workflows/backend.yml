@@ -1,0 +1,32 @@
+name: backend
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Runner já inclui Docker (Testcontainers sobe Postgres sozinho).
+    # Em produção defina o secret JWT_SECRET; no CI cai no valor de teste.
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'ci-test-secret-com-mais-de-32-caracteres-0123456789' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build + testes
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B verify

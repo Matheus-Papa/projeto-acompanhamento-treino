@@ -1,4 +1,4 @@
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
@@ -60,6 +60,11 @@ function Navegacao() {
   );
 }
 
+function RotaDesconhecida() {
+  const { token } = useAuth();
+  return token ? <Navigate to="/" replace /> : <LoginPage />;
+}
+
 export function App() {
   return (
     <AuthProvider>
@@ -80,7 +85,7 @@ export function App() {
               <Route path="/fichas" element={<FichasPage />} />
               <Route path="/fichas/:id" element={<FichaDetalhePage />} />
             </Route>
-            <Route path="*" element={<LoginPage />} />
+            <Route path="*" element={<RotaDesconhecida />} />
           </Routes>
         </main>
         <Navegacao />

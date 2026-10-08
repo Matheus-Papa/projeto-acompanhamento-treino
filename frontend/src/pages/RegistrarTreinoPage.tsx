@@ -4,14 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { api, mensagemErro } from "../api/client";
 import type { Exercicio, Ficha, Treino } from "../api/types";
+import { hojeISO } from "../utils/data";
 import { RestTimer } from "../components/RestTimer";
-
-function hojeISO(): string {
-  const agora = new Date();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const dia = String(agora.getDate()).padStart(2, "0");
-  return `${agora.getFullYear()}-${mes}-${dia}`;
-}
 
 interface LinhaSerie {
   key: number;
@@ -108,7 +102,9 @@ export function RegistrarTreinoPage() {
     onError: (e) => setErroApi(mensagemErro(e, "Não foi possível registrar o treino.")),
   });
 
-  // Mostra os PRs e segue para o histórico.
+  // Auto-redirect após 4s. O cleanup cancela o timeout ao desmontar, então
+  // cliques em "Ver detalhes"/"Ir para o histórico" (que navegam e desmontam)
+  // nunca competem com o redirect.
   useEffect(() => {
     if (!concluido) return;
     const t = window.setTimeout(() => navigate("/historico"), 4000);

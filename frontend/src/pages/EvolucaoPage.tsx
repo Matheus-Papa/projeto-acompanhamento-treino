@@ -13,11 +13,7 @@ import {
 } from "recharts";
 import { api, mensagemErro } from "../api/client";
 import type { Exercicio, HistoricoItem, Recorde } from "../api/types";
-
-function formatarData(iso: string): string {
-  const [ano, mes, dia] = iso.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
+import { formatarData } from "../utils/data";
 
 export function EvolucaoPage() {
   const { exercicioId } = useParams<{ exercicioId: string }>();
@@ -36,17 +32,20 @@ export function EvolucaoPage() {
     queryKey: ["recorde", exercicioId],
     queryFn: async () => (await api.get<Recorde>(`/exercicios/${exercicioId}/recorde`)).data,
     enabled: Boolean(exercicioId),
+    // Sem treino o backend retorna 404: não retentar, e segurar o cache por 30s.
+    retry: false,
+    staleTime: 30_000,
   });
 
   const nomeSelecionado = exercicios.data?.find((e) => e.id === exercicioId)?.nome;
 
   const pontosEpley = (historico.data ?? []).map((h) => ({
     data: formatarData(h.data),
-    epley: Number(h.epley),
+    epley: h.epley,
   }));
   const pontosVolume = (historico.data ?? []).map((h) => ({
     data: formatarData(h.data),
-    volume: Number(h.volume),
+    volume: h.volume,
   }));
 
   return (
@@ -86,6 +85,11 @@ export function EvolucaoPage() {
         <p className="muted">Sem treinos com este exercício ainda.</p>
       )}
 
+      {exercicioId && recorde.isError && (
+        <p className="erro" role="alert">
+          {mensagemErro(recorde.error, "Não foi possível carregar o recorde.")}
+        </p>
+      )}
       {exercicioId && recorde.data && (
         <section className="card">
           <h2>Recorde{ nomeSelecionado ? ` · ${nomeSelecionado}` : ""}</h2>
@@ -103,7 +107,6 @@ export function EvolucaoPage() {
               <span className="muted">data do recorde</span>
             </div>
           </div>
-          {recorde.isError && <p className="erro">Não foi possível carregar o recorde.</p>}
         </section>
       )}
 
