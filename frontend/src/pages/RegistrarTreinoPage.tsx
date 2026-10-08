@@ -240,7 +240,7 @@ export function RegistrarTreinoPage() {
   }
 
   return (
-    <div className="coluna com-rodape">
+    <div className="coluna">
       <section className="card">
         <h1>Treino de hoje</h1>
         <div className="coluna">
@@ -381,6 +381,14 @@ export function RegistrarTreinoPage() {
             Copiar última série
           </button>
         </div>
+        <button
+          type="button"
+          className="botao-cheio"
+          disabled={finalizar.isPending}
+          onClick={onFinalizar}
+        >
+          {finalizar.isPending ? "Salvando…" : "Finalizar treino"}
+        </button>
       </section>
 
       {erroApi && (
@@ -388,12 +396,6 @@ export function RegistrarTreinoPage() {
           {erroApi}
         </p>
       )}
-
-      <div className="rodape-fixo">
-        <button type="button" disabled={finalizar.isPending} onClick={onFinalizar}>
-          {finalizar.isPending ? "Salvando…" : "Finalizar treino"}
-        </button>
-      </div>
     </div>
   );
 }

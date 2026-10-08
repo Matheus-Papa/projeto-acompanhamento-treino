@@ -15,7 +15,6 @@
   --sombra-botao: 0 6px 16px -6px rgb(26 86 219 / 55%);
   /* Altura base da tabbar (sem safe-area). Rodapé usa a mesma variável. */
   --tabbar-altura: 72px;
-  --rodape-gap: 8px;
 }
 
 * {
@@ -456,10 +455,6 @@ button:disabled {
   font-size: 1.1rem;
 }
 
-.com-rodape {
-  padding-bottom: 190px;
-}
-
 .serie-card {
   border: 1px solid var(--borda);
   border-radius: var(--raio);
@@ -552,29 +547,6 @@ button:disabled {
   box-shadow: none;
 }
 
-.rodape-fixo {
-  position: fixed;
-  left: 0;
-  right: 0;
-  /* Sempre acima da tabbar: altura real da tabbar + safe-area + respiro. */
-  bottom: calc(var(--tabbar-altura) + env(safe-area-inset-bottom) + var(--rodape-gap));
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: rgb(255 255 255 / 96%);
-  border-top: 1px solid var(--borda);
-  backdrop-filter: blur(12px);
-  z-index: 15;
-}
-
-.rodape-fixo button {
-  width: 100%;
-  max-width: 648px;
-  margin: 0 auto;
-  min-height: 56px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #fff;
-}
-
 .chart-box {
   width: 100%;
   overflow-x: auto;
@@ -617,12 +589,6 @@ button:disabled {
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-}
-
-@media (min-width: 720px) {
-  .rodape-fixo {
-    bottom: 0;
-  }
 }
 
 /* Aba Exercícios: cabeçalho com presença, busca, chips e grupos. */
