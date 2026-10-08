@@ -23,7 +23,9 @@
     <!-- Versões pinadas das dependências fora do BOM do Spring Boot -->
     <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
     <jjwt.version>0.12.6</jjwt.version>
-    <testcontainers.version>1.19.7</testcontainers.version>
+    <!-- Testcontainers >= 1.21.4: necessário para Docker Engine v29+ (API mínima 1.44).
+         Versões antigas (ex.: 1.19.x via docker-java 1.32) são rejeitadas com 400. -->
+    <testcontainers.version>1.21.4</testcontainers.version>
   </properties>
 
   <dependencyManagement>
