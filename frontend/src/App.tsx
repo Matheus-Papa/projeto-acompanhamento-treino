@@ -19,56 +19,73 @@ function ativo(pathname: string, base: string, exato = false): string {
   return pathname === base || pathname.startsWith(`${base}/`) ? "ativo" : "";
 }
 
-function Navegacao() {
+const TABS = [
+  { to: "/", rotulo: "Treino", icone: "🏋️", exato: true },
+  { to: "/historico", rotulo: "Histórico", icone: "🕘", exato: false },
+  { to: "/evolucao", rotulo: "Evolução", icone: "📈", exato: false },
+  { to: "/estatisticas", rotulo: "Estatísticas", icone: "📊", exato: false },
+  { to: "/medidas", rotulo: "Medidas", icone: "⚖️", exato: false },
+  { to: "/exercicios", rotulo: "Exercícios", icone: "💪", exato: false },
+  { to: "/fichas", rotulo: "Fichas", icone: "📋", exato: false },
+];
+
+function Topo() {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   if (!token) return null;
-
   function sair() {
     logout();
     navigate("/login");
   }
+  return (
+    <header className="topo">
+      <span className="marca" aria-label="Meu Treino">
+        <span className="marca-icone" aria-hidden="true">
+          💪
+        </span>
+        Meu Treino
+      </span>
+      <button type="button" className="sair" onClick={sair}>
+        Sair
+      </button>
+    </header>
+  );
+}
+
+function Navegacao() {
+  const { token } = useAuth();
+  const { pathname } = useLocation();
+  if (!token) return null;
 
   return (
     <nav className="tabbar" aria-label="Navegação principal">
-      <Link to="/" className={ativo(pathname, "/", true)}>
-        Treino
-      </Link>
-      <Link to="/historico" className={ativo(pathname, "/historico") || ativo(pathname, "/treinos")}>
-        Histórico
-      </Link>
-      <Link to="/evolucao" className={ativo(pathname, "/evolucao")}>
-        Evolução
-      </Link>
-      <Link to="/estatisticas" className={ativo(pathname, "/estatisticas")}>
-        Stats
-      </Link>
-      <Link to="/medidas" className={ativo(pathname, "/medidas")}>
-        Medidas
-      </Link>
-      <Link to="/exercicios" className={ativo(pathname, "/exercicios")}>
-        Exercícios
-      </Link>
-      <Link to="/fichas" className={ativo(pathname, "/fichas")}>
-        Fichas
-      </Link>
-      <button type="button" className="link" onClick={sair}>
-        Sair
-      </button>
+      {TABS.map((t) => {
+        const cls = t.to === "/historico"
+          ? ativo(pathname, "/historico") || ativo(pathname, "/treinos")
+          : ativo(pathname, t.to, t.exato);
+        return (
+          <Link key={t.to} to={t.to} className={cls}>
+            <span className="tab-icone" aria-hidden="true">
+              {t.icone}
+            </span>
+            {t.rotulo}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
 
 function RotaDesconhecida() {
   const { token } = useAuth();
-  return token ? <Navigate to="/" replace /> : <LoginPage />;
+  return <Navigate to={token ? "/" : "/login"} replace />;
 }
 
 export function App() {
   return (
     <AuthProvider>
       <div className="app">
+        <Topo />
         <main className="conteudo">
           <Routes>
             <Route path="/login" element={<LoginPage />} />

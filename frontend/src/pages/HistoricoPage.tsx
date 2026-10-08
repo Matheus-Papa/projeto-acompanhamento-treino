@@ -42,6 +42,7 @@ export function HistoricoPage() {
 
   function aplicarFiltros(e: FormEvent) {
     e.preventDefault();
+    setItens([]);
     setAplicados({ de, ate });
     setPagina(0);
   }
@@ -49,6 +50,7 @@ export function HistoricoPage() {
   function limparFiltros() {
     setDe("");
     setAte("");
+    setItens([]);
     setAplicados({ de: "", ate: "" });
     setPagina(0);
   }

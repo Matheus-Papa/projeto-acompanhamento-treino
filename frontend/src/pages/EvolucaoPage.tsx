@@ -121,7 +121,7 @@ export function EvolucaoPage() {
                   <XAxis dataKey="data" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="epley" name="1RM (kg)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="epley" name="1RM (kg)" stroke="var(--primaria)" strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -136,7 +136,7 @@ export function EvolucaoPage() {
                   <XAxis dataKey="data" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
-                  <Bar dataKey="volume" name="Volume (kg)" />
+                  <Bar dataKey="volume" name="Volume (kg)" fill="var(--primaria)" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { api, mensagemErro } from "../api/client";
-import type { Exercicio, Ficha, Treino } from "../api/types";
+import type { Exercicio, Ficha, Treino, TreinoRequest } from "../api/types";
 import { hojeISO } from "../utils/data";
 import { RestTimer } from "../components/RestTimer";
 
@@ -12,18 +12,7 @@ interface LinhaSerie {
   exercicioId: string;
   repeticoes: string;
   cargaKg: string;
-  rpe: string;
 }
-
-const rpeSchema = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? undefined : v),
-  z.coerce
-    .number()
-    .int("RPE deve ser um número inteiro")
-    .min(1, "RPE mínimo é 1")
-    .max(10, "RPE máximo é 10")
-    .optional(),
-);
 
 const serieSchema = z.object({
   exercicioId: z.string().min(1, "Exercício é obrigatório"),
@@ -32,7 +21,6 @@ const serieSchema = z.object({
     .int("Repetições devem ser um número inteiro")
     .positive("Repetições devem ser maiores que zero"),
   cargaKg: z.coerce.number().nonnegative("Carga não pode ser negativa"),
-  rpe: rpeSchema,
 });
 
 const treinoSchema = z.object({
@@ -66,13 +54,14 @@ function rotuloPr(tipo: string): string {
 
 export function RegistrarTreinoPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const proximaKey = useRef(1);
   const [fichaId, setFichaId] = useState("");
   const [data, setData] = useState(hojeISO());
   const [duracao, setDuracao] = useState("");
   const [observacao, setObservacao] = useState("");
   const [linhas, setLinhas] = useState<LinhaSerie[]>([
-    { key: 0, exercicioId: "", repeticoes: "10", cargaKg: "0", rpe: "" },
+    { key: 0, exercicioId: "", repeticoes: "10", cargaKg: "0" },
   ]);
   const [erros, setErros] = useState<Record<string, string>>({});
   const [erroApi, setErroApi] = useState("");
@@ -93,11 +82,14 @@ export function RegistrarTreinoPage() {
   });
 
   const finalizar = useMutation({
-    mutationFn: async (corpo: object) => (await api.post<Treino>("/treinos", corpo)).data,
+    mutationFn: async (corpo: TreinoRequest) => (await api.post<Treino>("/treinos", corpo)).data,
     onSuccess: (treino) => {
       setErroApi("");
       setErros({});
       setConcluido(treino);
+      void queryClient.invalidateQueries({ queryKey: ["treinos"] });
+      void queryClient.invalidateQueries({ queryKey: ["volume-semanal"] });
+      void queryClient.invalidateQueries({ queryKey: ["recordes-destaque"] });
     },
     onError: (e) => setErroApi(mensagemErro(e, "Não foi possível registrar o treino.")),
   });
@@ -126,7 +118,6 @@ export function RegistrarTreinoPage() {
       exercicioId: base?.exercicioId ?? "",
       repeticoes: base?.repeticoes ?? "10",
       cargaKg: base?.cargaKg ?? "0",
-      rpe: base?.rpe ?? "",
     };
   }
 
@@ -166,7 +157,6 @@ export function RegistrarTreinoPage() {
             exercicioId: item.exercicio.id,
             repeticoes: String(item.repsAlvo),
             cargaKg: "0",
-            rpe: "",
           }),
         );
       }
@@ -185,7 +175,6 @@ export function RegistrarTreinoPage() {
         exercicioId: l.exercicioId,
         repeticoes: l.repeticoes,
         cargaKg: l.cargaKg,
-        rpe: l.rpe,
       })),
     });
     if (!parse.success) {
@@ -208,7 +197,6 @@ export function RegistrarTreinoPage() {
         numero: i + 1,
         repeticoes: s.repeticoes,
         cargaKg: s.cargaKg,
-        rpe: s.rpe,
       })),
     });
   }
@@ -340,7 +328,7 @@ export function RegistrarTreinoPage() {
                   <span className="erro">{erroLinha(i, "exercicioId")}</span>
                 )}
               </label>
-              <div className="serie-grid">
+              <div className="serie-grid serie-grid-2">
                 <label>
                   Reps
                   <input
@@ -367,20 +355,6 @@ export function RegistrarTreinoPage() {
                     onChange={(e) => atualizarLinha(linha.key, "cargaKg", e.target.value)}
                   />
                   {erroLinha(i, "cargaKg") && <span className="erro">{erroLinha(i, "cargaKg")}</span>}
-                </label>
-                <label>
-                  RPE (opcional)
-                  <input
-                    className="input-grande"
-                    type="number"
-                    min={1}
-                    max={10}
-                    inputMode="numeric"
-                    placeholder="—"
-                    value={linha.rpe}
-                    onChange={(e) => atualizarLinha(linha.key, "rpe", e.target.value)}
-                  />
-                  {erroLinha(i, "rpe") && <span className="erro">{erroLinha(i, "rpe")}</span>}
                 </label>
               </div>
               <div className="acoes-linha">

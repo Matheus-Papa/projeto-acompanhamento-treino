@@ -30,6 +30,7 @@ export function TreinoDetalhePage() {
 
   const dados = treino.data;
   const series = [...dados.series].sort((a, b) => a.numero - b.numero);
+  const nomePorExercicio = new Map(series.map((s) => [s.exercicio.id, s.exercicio.nome]));
 
   return (
     <div className="coluna">
@@ -49,7 +50,10 @@ export function TreinoDetalhePage() {
           <ul className="lista">
             {dados.prs.map((pr) => (
               <li key={`${pr.exercicioId}-${pr.tipo}`}>
-                <span className="badge-pr">PR!</span>
+                <span>
+                  <span className="badge-pr">PR!</span>{" "}
+                  <strong>{nomePorExercicio.get(pr.exercicioId) ?? "Exercício"}</strong>
+                </span>
                 <span className="muted">{pr.tipo === "CARGA" ? "recorde de carga" : pr.tipo === "E1RM" ? "recorde de 1RM" : "recorde de carga + 1RM"}</span>
               </li>
             ))}
@@ -67,7 +71,7 @@ export function TreinoDetalhePage() {
                 {s.numero}. {s.exercicio.nome}
               </strong>
               <span className="muted">
-                {s.repeticoes} reps × {s.cargaKg} kg{s.rpe ? ` · RPE ${s.rpe}` : ""}
+                {s.repeticoes} reps × {s.cargaKg} kg
               </span>
             </li>
           ))}

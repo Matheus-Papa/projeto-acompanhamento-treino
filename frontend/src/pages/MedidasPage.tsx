@@ -140,7 +140,7 @@ export function MedidasPage() {
                 <XAxis dataKey="data" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} />
                 <Tooltip />
-                <Line type="monotone" dataKey="peso" name="Peso (kg)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--primaria)" strokeWidth={3} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -151,7 +151,7 @@ export function MedidasPage() {
               <strong>
                 {formatarData(m.data)} · {m.pesoKg} kg
               </strong>
-              {m.percentualGordura && (
+              {m.percentualGordura != null && (
                 <span className="muted">{m.percentualGordura}% gordura</span>
               )}
             </li>

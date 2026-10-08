@@ -6,7 +6,10 @@ export function hojeISO(): string {
   return `${agora.getFullYear()}-${mes}-${dia}`;
 }
 
-export function formatarData(iso: string): string {
-  const [ano, mes, dia] = iso.split("-");
+export function formatarData(iso: string | null | undefined): string {
+  if (!iso || typeof iso !== "string") return "—";
+  const parte = iso.includes("T") ? iso.slice(0, 10) : iso;
+  const [ano, mes, dia] = parte.split("-");
+  if (!ano || !mes || !dia) return "—";
   return `${dia}/${mes}/${ano}`;
 }

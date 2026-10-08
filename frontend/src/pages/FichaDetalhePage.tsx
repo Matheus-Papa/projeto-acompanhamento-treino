@@ -29,7 +29,10 @@ export function FichaDetalhePage() {
     control,
     reset,
     formState: { errors },
-  } = useForm<FichaForm>({ resolver: zodResolver(fichaSchema) });
+  } = useForm<FichaForm>({
+    resolver: zodResolver(fichaSchema),
+    defaultValues: { nome: "", itens: [] },
+  });
   const { fields, append, remove } = useFieldArray({ control, name: "itens" });
 
   useEffect(() => {

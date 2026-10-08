@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
   BarChart,
@@ -42,24 +42,30 @@ export function EstatisticasPage() {
   });
 
   // Recordes: sem endpoint agregado, busca o recorde de no máximo 5 exercícios
-  // (exercícios sem treino retornam 404 e são ignorados) e exibe os 3 maiores
-  // 1RM dessa amostra — não é um top 3 global. Ideal: GET /estatisticas/recordes.
+  // numa única query (Promise.allSettled: 404 de exercício sem treino é ignorado)
+  // e exibe os 3 maiores 1RM da amostra — não é um top 3 global.
+  // Ideal: GET /estatisticas/recordes.
   const primeiros = (exercicios.data ?? []).slice(0, 5);
-  const recordes = useQueries({
-    queries: primeiros.map((ex) => ({
-      queryKey: ["recorde", ex.id],
-      queryFn: async () => (await api.get<Recorde>(`/exercicios/${ex.id}/recorde`)).data,
-      retry: false,
-      staleTime: 30_000,
-    })),
+  const recordes = useQuery({
+    queryKey: ["recordes-destaque", primeiros.map((e) => e.id).join(",")],
+    queryFn: async () => {
+      const resultados = await Promise.allSettled(
+        primeiros.map(async (ex) => ({
+          nome: ex.nome,
+          rec: (await api.get<Recorde>(`/exercicios/${ex.id}/recorde`)).data,
+        })),
+      );
+      return resultados
+        .filter((r): r is PromiseFulfilledResult<{ nome: string; rec: Recorde }> => r.status === "fulfilled")
+        .map((r) => r.value)
+        .sort((a, b) => b.rec.maxEpley - a.rec.maxEpley)
+        .slice(0, 3);
+    },
+    enabled: primeiros.length > 0,
+    staleTime: 30_000,
   });
-  const carregandoRecordes = recordes.some((r) => r.isPending);
-  const destaques = recordes
-    .map((r, i) => ({ ex: primeiros[i], rec: r.data }))
-    .filter((x) => x.rec !== undefined)
-    .map((x) => ({ nome: x.ex.nome, rec: x.rec as Recorde }))
-    .sort((a, b) => b.rec.maxEpley - a.rec.maxEpley)
-    .slice(0, 3);
+  const carregandoRecordes = recordes.isPending;
+  const destaques = recordes.data ?? [];
 
   const pontos = (volume.data ?? []).map((v) => ({
     semana: formatarData(v.semanaSegunda),
@@ -102,7 +108,7 @@ export function EstatisticasPage() {
                   <XAxis dataKey="semana" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
-                  <Bar dataKey="volume" name="Volume (kg)" />
+                  <Bar dataKey="volume" name="Volume (kg)" fill="var(--primaria)" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
