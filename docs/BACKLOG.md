@@ -70,11 +70,11 @@
 
 Build verde (`./mvnw verify` + `npm run build`), testes passando, sem TODOs esquecidos, sem segredos no código, `README/AGENTS.md` atualizados quando relevante, review sem pendência alta/média, `docs/fase-N-explicacao.md` criada, commit Conventional Commits por fase.
 
-## Riscos e decisões em aberto
+## Riscos e decisões em aberto (atualizado 28/09/2026 — tudo verificado nesta máquina)
 
-1. **Java 21 ausente na máquina (só Java 8) + sem Maven/Docker** — build local bloqueado até instalar Temurin 21 + Docker Desktop. Código pode ser escrito sem build; verificação fica pendente.
-2. Testcontainers exige Docker — sem Docker, F7-02 não roda local; CI cobre.
+1. ~~Java 21 ausente + sem Maven/Docker~~ RESOLVIDO: Temurin 21 + Docker Desktop 29 instalados; `./mvnw verify` **verde (21/21)** e `docker compose up --build` **saudável (db+api+web)**.
+2. Testcontainers exigia ≥1.21.4 no Docker Engine v29 (API mínima 1.44; 1.19.x falha com 400). Fix commitado (`fix(tests)`).
 3. `numeric(6,2)` limita a 9999.99 kg — aceito e documentado.
 4. `data` como `LocalDate`, validação `!data.isAfter(hoje)` — evita fuso.
-5. Tipos TS via `openapi-typescript`; fallback manual se falhar no Windows.
-6. F4 pode iniciar com usuário mockado e religar ao JWT na F6-03.
+5. Tipos TS manuais espelhando DTOs (contrato numérico `number` alinhado ao Jackson); regen via openapi-typescript documentada.
+6. Segurança (F6) foi executada antes de F3-F5: isolamento nasceu junto, sem relink.
